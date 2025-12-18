@@ -1,0 +1,93 @@
+# ============================================================
+# Zero Email - Serverless Deployment (Coolify Optimized)
+# Uses: Neon PostgreSQL + Upstash Redis (no local containers)
+# ============================================================
+version: '3.8'
+
+services:
+  # Main Application (Frontend + Backend)
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    restart: unless-stopped
+    environment:
+      # Runtime
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: "0.0.0.0"
+      NEXT_TELEMETRY_DISABLED: 1
+
+      # Application URLs (Coolify will set these)
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+      BETTER_AUTH_TRUSTED_ORIGINS: ${BETTER_AUTH_TRUSTED_ORIGINS}
+
+      # Authentication
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      AUTUMN_SECRET_KEY: ${AUTUMN_SECRET_KEY}
+
+      # Google OAuth
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REFRESH_TOKEN: ${GOOGLE_REFRESH_TOKEN}
+
+      # Neon PostgreSQL (Serverless)
+      DATABASE_URL: ${DATABASE_URL}
+      NEON_CONNECTION_STRING: ${NEON_CONNECTION_STRING}
+
+      # Upstash Redis (Serverless)
+      REDIS_URL: ${REDIS_URL}
+      REDIS_TOKEN: ${REDIS_TOKEN}
+      UPSTASH_REDIS_REST_URL: ${UPSTASH_REDIS_REST_URL}
+      UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN}
+
+      # Cloudflare
+      CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+      CLOUDFLARE_AI_TOKEN: ${CLOUDFLARE_AI_TOKEN}
+      CLOUDFLARE_ZONE_ID: ${CLOUDFLARE_ZONE_ID}
+      CORS_WORKER_URL: ${CORS_WORKER_URL}
+
+      # AI (Optional)
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      OPENAI_MINI_MODEL: ${OPENAI_MINI_MODEL:-gpt-4o-mini}
+      PERPLEXITY_API_KEY: ${PERPLEXITY_API_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      AI_SYSTEM_PROMPT: ${AI_SYSTEM_PROMPT}
+      NEXT_PUBLIC_ELEVENLABS_AGENT_ID: ${NEXT_PUBLIC_ELEVENLABS_AGENT_ID}
+
+      # Email (Optional)
+      RESEND_API_KEY: ${RESEND_API_KEY}
+
+      # Twilio (Optional)
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER}
+
+      # Analytics (Optional)
+      NEXT_PUBLIC_POSTHOG_KEY: ${NEXT_PUBLIC_POSTHOG_KEY}
+      NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST}
+
+      # Image Processing (Optional)
+      NEXT_PUBLIC_IMAGE_PROXY: ${NEXT_PUBLIC_IMAGE_PROXY}
+      NEXT_PUBLIC_IMAGE_API_URL: ${NEXT_PUBLIC_IMAGE_API_URL}
+
+      # Sync Configuration
+      DROP_AGENT_TABLES: ${DROP_AGENT_TABLES:-false}
+      THREAD_SYNC_MAX_COUNT: ${THREAD_SYNC_MAX_COUNT:-500}
+      THREAD_SYNC_LOOP: ${THREAD_SYNC_LOOP:-true}
+
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '--quiet', 'http://127.0.0.1:3000']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    ports:
+      - "3000:3000"
+
+# No volumes needed - using serverless databases
