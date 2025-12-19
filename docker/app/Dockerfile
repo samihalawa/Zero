@@ -39,9 +39,9 @@ ENV CI=true
 # Install all dependencies (including devDependencies for build)
 RUN pnpm install --frozen-lockfile
 
-# Set environment variables for build
+# Set environment variables for build (NODE_ENV=development to install devDependencies)
 ENV NEXT_TELEMETRY_DISABLED=1 \
-    NODE_ENV=production \
+    NODE_ENV=development \
     DOCKER_BUILD=true
 
 # Build the application
@@ -53,7 +53,8 @@ RUN cd apps/mail && pnpm run build
 FROM base AS runner
 WORKDIR /app
 
-RUN npm install -g wrangler
+# Install Bun and wrangler
+RUN npm install -g bun wrangler
 
 RUN addgroup -S -g 1001 pnpm && \
     adduser -S -u 1001 nextjs -G pnpm
