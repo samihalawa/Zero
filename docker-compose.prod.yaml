@@ -38,6 +38,16 @@ services:
       start_period: 10s
     expose:
       - "3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zero.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.zero.entrypoints=http,https"
+      - "traefik.http.routers.zero.tls=true"
+      - "traefik.http.routers.zero.tls.certresolver=letsencrypt"
+      - "traefik.http.services.zero.loadbalancer.server.port=3000"
+    networks:
+      - coolify
+      - default
 
   migrations:
     build:
@@ -91,6 +101,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+networks:
+  coolify:
+    external: true
+  default:
+    driver: bridge
 
 volumes:
   valkey-data:
