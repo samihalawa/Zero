@@ -149,12 +149,6 @@ services:
     # ports removed - Coolify handles external routing via Traefik
     networks:
       - zero-network
-      - coolify
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.zero-app.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.zero-app.entrypoints=http"
-      - "traefik.http.services.zero-app.loadbalancer.server.port=3000"
 
 volumes:
   postgres-data:
@@ -165,5 +159,3 @@ volumes:
 networks:
   zero-network:
     driver: bridge
-  coolify:
-    external: true
