@@ -83,6 +83,11 @@ services:
       context: .
       dockerfile: docker/app/Dockerfile
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zero-app.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.zero-app.entrypoints=http"
+      - "traefik.http.services.zero-app.loadbalancer.server.port=3000"
     environment:
       # Application URLs
       VITE_PUBLIC_BACKEND_URL: ${VITE_PUBLIC_BACKEND_URL:-http://localhost:3000}
@@ -149,6 +154,7 @@ services:
     # ports removed - Coolify handles external routing via Traefik
     networks:
       - zero-network
+      - coolify
 
 volumes:
   postgres-data:
@@ -159,3 +165,5 @@ volumes:
 networks:
   zero-network:
     driver: bridge
+  coolify:
+    external: true
