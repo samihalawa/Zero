@@ -42,7 +42,9 @@ RUN pnpm install --frozen-lockfile
 # Set environment variables for build (NODE_ENV=development to install devDependencies)
 ENV NEXT_TELEMETRY_DISABLED=1 \
     NODE_ENV=development \
-    DOCKER_BUILD=true
+    DOCKER_BUILD=true \
+    VITE_PUBLIC_APP_URL=http://REPLACE-APP-URL.com \
+    VITE_PUBLIC_BACKEND_URL=http://REPLACE-BACKEND-URL.com
 
 # Build the application
 RUN cd apps/mail && pnpm run build
@@ -65,12 +67,12 @@ ENV NODE_ENV=production \
     HOSTNAME="0.0.0.0" \
     NEXT_TELEMETRY_DISABLED=1
 
-# Copy entrypoint and run it
-COPY scripts/docker/ /app/scripts
-RUN chmod -R +x /app/scripts/*
-
-# Copy the entire built application
+# Copy the entire built application first
 COPY --from=builder --chown=nextjs:pnpm /app ./
+
+# Copy entrypoint scripts AFTER builder copy (to ensure latest scripts are used)
+COPY --chown=nextjs:pnpm scripts/docker/ /app/scripts/docker/
+RUN chmod -R +x /app/scripts/docker/*
 
 # Switch to non-root user
 USER nextjs
@@ -79,4 +81,4 @@ USER nextjs
 EXPOSE 3000
 
 # Start the server
-CMD ["/app/scripts/entrypoint.sh"]
+CMD ["/app/scripts/docker/entrypoint.sh"]
